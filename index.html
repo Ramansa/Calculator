@@ -10,33 +10,221 @@
     <meta property="og:title" content="Online Calculator">
     <meta property="og:description" content="A fast, responsive online calculator featuring scientific functions and history.">
     <meta property="og:type" content="website">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
-    <script src="https://unpkg.com/lucide@latest"></script>
+    
     <style>
-        body {
-            font-family: 'Roboto', sans-serif;
-            background-color: #000;
-            margin: 0;
-            overflow: hidden; /* Prevent pull-to-refresh on mobile */
-        }
-        
-        /* Hide scrollbar for display but keep functionality */
-        .no-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
-        .no-scrollbar {
-            -ms-overflow-style: none;  /* IE and Edge */
-            scrollbar-width: none;  /* Firefox */
+        :root {
+            --bg-color: #000000;
+            --calc-color: #202124;
+            --btn-bg: #3c4043;
+            --accent-color: #a8c7fa;
+            --text-color: #ffffff;
         }
 
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            /* Fallback system fonts replacing external Google Font */
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            overflow: hidden; /* Prevent pull-to-refresh on mobile */
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+
+        /* --- Scrollbar Hiding --- */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* --- Layout & Containers --- */
+        .app-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            width: 100%;
+        }
+
+        .calc-container {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            height: 100vh;
+            background-color: var(--calc-color);
+            position: relative;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+
+        @media (min-width: 640px) {
+            .calc-container {
+                height: auto;
+                max-width: 28rem;
+                margin: 0 auto;
+                border-radius: 2.5rem;
+                border: 8px solid var(--calc-color);
+                box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+            }
+        }
+
+        /* --- UI Components --- */
+        .status-bar-mock {
+            height: 1.5rem;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 0.5rem;
+            pointer-events: none;
+            opacity: 0;
+        }
+        @media (min-width: 640px) {
+            .status-bar-mock { opacity: 1; }
+        }
+        .status-pill { width: 4rem; height: 0.375rem; background-color: #4b5563; border-radius: 9999px; }
+
+        .display-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 1.5rem;
+            min-height: 30vh;
+        }
+
+        .history-display {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            color: #6b7280;
+            text-align: right;
+            font-size: 1rem;
+            height: 3rem;
+            margin-bottom: 0.5rem;
+            overflow-y: hidden;
+            overflow-x: auto;
+            white-space: nowrap;
+            letter-spacing: 0.05em;
+            font-weight: 300;
+            gap: 0.25rem;
+        }
+
+        .main-display-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            width: 100%;
+            position: relative;
+        }
+
+        .main-display {
+            color: var(--text-color);
+            text-align: right;
+            font-weight: 300;
+            width: 100%;
+            overflow-x: auto;
+            white-space: nowrap;
+            outline: none;
+            transition: font-size 0.2s ease;
+        }
+        
+        .text-6xl { font-size: 3.75rem; }
+        .text-4xl { font-size: 2.25rem; }
+        .text-3xl { font-size: 1.875rem; }
+
+        .live-result-display {
+            color: var(--accent-color);
+            text-align: right;
+            font-size: 1.5rem;
+            font-weight: 300;
+            width: 100%;
+            margin-top: 0.25rem;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .divider {
+            width: 100%;
+            height: 1px;
+            background-color: rgba(55, 65, 81, 0.5);
+            margin-bottom: 0.5rem;
+        }
+
+        /* --- Panel & Keypad --- */
+        .mode-toggle-bar {
+            padding: 0.25rem 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #9ca3af;
+        }
+
+        .pill-btn {
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            border: none;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: inherit;
+        }
+
+        .scientific-drawer {
+            padding: 0 1rem;
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 0.5rem;
+            overflow: hidden;
+            max-height: 0;
+            opacity: 0;
+            transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease, padding 0.3s ease;
+        }
+        .scientific-drawer.open {
+            max-height: 300px;
+            opacity: 1;
+            padding-bottom: 0.5rem;
+        }
+
+        .keypad {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.75rem;
+            padding: 1rem;
+            padding-bottom: 2rem;
+        }
+        @media (min-width: 640px) {
+            .keypad { padding-bottom: 1.5rem; }
+        }
+
+        /* --- Buttons --- */
         .calc-btn {
             position: relative;
             overflow: hidden;
-            transition: background-color 0.15s ease;
-            user-select: none;
-            -webkit-tap-highlight-color: transparent;
+            border: none;
+            border-radius: 50%;
+            aspect-ratio: 1 / 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: 400;
+            transition: filter 0.2s, background-color 0.2s;
         }
+
+        .btn-text-sm { font-size: 0.875rem; font-weight: 500; }
+        .btn-text-2xl { font-size: 1.5rem; }
+        .btn-text-3xl { font-size: 1.875rem; }
+        .btn-text-4xl { font-size: 2.25rem; padding-bottom: 0.25rem; }
 
         .calc-btn:active::after {
             content: "";
@@ -52,118 +240,242 @@
         }
 
         @keyframes ripple {
-            to {
-                transform: translate(-50%, -50%) scale(2);
-                opacity: 0;
-            }
+            to { transform: translate(-50%, -50%) scale(2); opacity: 0; }
         }
 
-        .scientific-drawer {
-            transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
-            max-height: 0;
-            opacity: 0;
-            overflow: hidden;
+        .action-btn { background-color: #5f6368; color: var(--accent-color); }
+        .action-btn:hover { filter: brightness(1.2); }
+        
+        .equals-btn {
+            background-color: var(--accent-color);
+            color: #111827;
+            font-size: 2.25rem;
+            box-shadow: 0 4px 14px 0 rgba(0,0,0,0.3);
         }
+        .equals-btn:hover { filter: brightness(1.1); }
 
-        .scientific-drawer.open {
-            max-height: 300px; /* Adjust based on content */
-            opacity: 1;
-        }
-
-        :root {
-            --bg-color: #000000;
-            --calc-color: #202124;
-            --btn-bg: #3c4043;
-            --accent-color: #a8c7fa;
-            --text-color: #ffffff;
-        }
-
-        body {
-            font-family: 'Roboto', sans-serif;
-            background-color: var(--bg-color);
-            margin: 0;
-            overflow: hidden; /* Prevent pull-to-refresh on mobile */
-        }
-
-        .theme-btn { background-color: var(--btn-bg); transition: background-color 0.2s, filter 0.2s; }
+        /* --- Themes --- */
+        .theme-btn { background-color: var(--btn-bg); color: var(--text-color); }
         .theme-btn:hover { filter: brightness(1.2); }
-        
-        .theme-accent-text { color: var(--accent-color); transition: color 0.2s; }
-        
-        .theme-accent-bg { background-color: var(--accent-color); transition: background-color 0.2s, filter 0.2s; }
-        .theme-accent-bg:hover { filter: brightness(1.1); }
-        
+        .theme-accent-text { color: var(--accent-color) !important; transition: color 0.2s; }
         .theme-text { color: var(--text-color); transition: color 0.2s; }
+
+        /* --- Icons --- */
+        .icon { width: 1.5rem; height: 1.5rem; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+        .icon-sm { width: 1rem; height: 1rem; transition: transform 0.3s ease; }
+        .icon-lg { width: 1.75rem; height: 1.75rem; }
+
+        /* --- Settings UI --- */
+        .sr-only {
+            position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+            overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border-width: 0;
+        }
+
+        .settings-btn {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            padding: 0.5rem;
+            border-radius: 50%;
+            background-color: rgba(31, 41, 55, 0.8);
+            color: #9ca3af;
+            border: none;
+            cursor: pointer;
+            z-index: 40;
+            backdrop-filter: blur(4px);
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+            transition: color 0.2s, background-color 0.2s;
+        }
+        .settings-btn:hover { color: #ffffff; background-color: rgba(55, 65, 81, 1); }
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background-color: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 50;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+        .modal-overlay.open { opacity: 1; pointer-events: auto; }
+
+        .modal-content {
+            background-color: #202124;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            width: 91.666%;
+            max-width: 24rem;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+            border: 1px solid #374151;
+            transform: scale(0.95);
+            transition: transform 0.3s;
+        }
+        .modal-overlay.open .modal-content { transform: scale(1); }
+
+        .modal-header {
+            font-size: 1.25rem;
+            font-weight: 500;
+            color: #ffffff;
+            margin-bottom: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .setting-group { margin-bottom: 1rem; }
+        .setting-label { display: block; font-size: 0.875rem; color: #9ca3af; margin-bottom: 0.5rem; }
         
-        .live-result-accent { color: var(--accent-color); }
+        .color-input-wrapper {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+        }
+        .color-picker-box {
+            position: relative;
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            border: 1px solid #4b5563;
+            box-shadow: inset 0 2px 4px 0 rgba(0,0,0,0.06);
+            flex-shrink: 0;
+        }
+        .color-picker {
+            position: absolute;
+            top: -0.5rem;
+            left: -0.5rem;
+            width: 4rem;
+            height: 4rem;
+            cursor: pointer;
+            background: transparent;
+            border: none;
+            padding: 0;
+        }
+        .color-text {
+            flex: 1;
+            background-color: #3c4043;
+            color: #ffffff;
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.5rem;
+            border: 1px solid transparent;
+            outline: none;
+            font-family: monospace;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            transition: all 0.2s;
+            width: 100%;
+        }
+        .color-text:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 2px rgba(168,199,250,0.5);
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 0.5rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(55, 65, 81, 0.5);
+        }
+        .btn-reset {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+            color: #f87171;
+            background: transparent;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.2s;
+        }
+        .btn-reset:hover { background-color: rgba(248, 113, 113, 0.1); }
+        .btn-done {
+            padding: 0.5rem 1.25rem;
+            font-size: 0.875rem;
+            background-color: var(--accent-color);
+            color: #111827;
+            font-weight: 500;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            box-shadow: 0 2px 10px 0 rgba(168,199,250,0.2);
+        }
+        .btn-done:hover { filter: brightness(1.1); }
     </style>
 </head>
-<body class="flex items-center justify-center min-h-screen theme-text select-none touch-manipulation">
+<body>
 
     <!-- Settings Button -->
-    <button id="settings-btn" class="fixed top-4 right-4 p-2 rounded-full bg-gray-800/80 text-gray-400 hover:text-white hover:bg-gray-700 transition-colors z-40 backdrop-blur-sm shadow-lg" aria-label="Settings">
-        <i data-lucide="settings" class="w-6 h-6"></i>
+    <button id="settings-btn" class="settings-btn" aria-label="Settings">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>
     </button>
 
     <!-- Settings Modal -->
-    <div id="settings-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex justify-center items-center z-50 opacity-0 pointer-events-none transition-opacity duration-300">
-        <div class="bg-[#202124] rounded-2xl p-6 w-11/12 max-w-sm shadow-2xl border border-gray-700 transform scale-95 transition-transform duration-300" id="settings-content">
-            <h2 class="text-xl font-medium text-white mb-5 flex items-center gap-2">
-                <i data-lucide="palette" class="w-5 h-5 text-[#a8c7fa]"></i> Appearance
+    <div id="settings-modal" class="modal-overlay">
+        <div class="modal-content" id="settings-content">
+            <h2 class="modal-header">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon" style="color: var(--accent-color);"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg> 
+                Appearance
             </h2>
-            <!-- Background Color -->
-            <div class="mb-4">
-                <label class="block text-sm text-gray-400 mb-2">Page Background</label>
-                <div class="flex gap-3 items-center">
-                    <div class="relative w-10 h-10 rounded-lg overflow-hidden border border-gray-600 shadow-inner shrink-0">
-                        <input type="color" id="bg-color-picker" class="absolute -top-2 -left-2 w-16 h-16 cursor-pointer bg-transparent border-0 p-0">
+            
+            <div class="setting-group">
+                <label class="setting-label">Page Background</label>
+                <div class="color-input-wrapper">
+                    <div class="color-picker-box">
+                        <input type="color" id="bg-color-picker" class="color-picker">
                     </div>
-                    <input type="text" id="bg-color-text" class="flex-1 bg-[#3c4043] text-white px-3 py-2 rounded-lg outline-none focus:ring-2 focus:ring-[#a8c7fa] font-mono text-sm uppercase border border-transparent transition-all" maxlength="7" placeholder="#000000">
+                    <input type="text" id="bg-color-text" class="color-text" maxlength="7" placeholder="#000000">
                 </div>
             </div>
-            <!-- Calculator Color -->
-            <div class="mb-6">
-                <label class="block text-sm text-gray-400 mb-2">Calculator Interface</label>
-                <div class="flex gap-3 items-center">
-                    <div class="relative w-10 h-10 rounded-lg overflow-hidden border border-gray-600 shadow-inner shrink-0">
-                        <input type="color" id="calc-color-picker" class="absolute -top-2 -left-2 w-16 h-16 cursor-pointer bg-transparent border-0 p-0">
+            
+            <div class="setting-group">
+                <label class="setting-label">Calculator Interface</label>
+                <div class="color-input-wrapper">
+                    <div class="color-picker-box">
+                        <input type="color" id="calc-color-picker" class="color-picker">
                     </div>
-                    <input type="text" id="calc-color-text" class="flex-1 bg-[#3c4043] text-white px-3 py-2 rounded-lg outline-none focus:ring-2 focus:ring-[#a8c7fa] font-mono text-sm uppercase border border-transparent transition-all" maxlength="7" placeholder="#202124">
+                    <input type="text" id="calc-color-text" class="color-text" maxlength="7" placeholder="#202124">
                 </div>
             </div>
-            <!-- Primary Button Color -->
-            <div class="mb-4">
-                <label class="block text-sm text-gray-400 mb-2">Primary Button</label>
-                <div class="flex gap-3 items-center">
-                    <div class="relative w-10 h-10 rounded-lg overflow-hidden border border-gray-600 shadow-inner shrink-0">
-                        <input type="color" id="btn-color-picker" class="absolute -top-2 -left-2 w-16 h-16 cursor-pointer bg-transparent border-0 p-0">
+            
+            <div class="setting-group">
+                <label class="setting-label">Primary Button</label>
+                <div class="color-input-wrapper">
+                    <div class="color-picker-box">
+                        <input type="color" id="btn-color-picker" class="color-picker">
                     </div>
-                    <input type="text" id="btn-color-text" class="flex-1 bg-[#3c4043] text-white px-3 py-2 rounded-lg outline-none focus:ring-2 focus:ring-[#a8c7fa] font-mono text-sm uppercase border border-transparent transition-all" maxlength="7" placeholder="#3c4043">
+                    <input type="text" id="btn-color-text" class="color-text" maxlength="7" placeholder="#3C4043">
                 </div>
             </div>
-            <!-- Text Color -->
-            <div class="mb-4">
-                <label class="block text-sm text-gray-400 mb-2">Main Text Color</label>
-                <div class="flex gap-3 items-center">
-                    <div class="relative w-10 h-10 rounded-lg overflow-hidden border border-gray-600 shadow-inner shrink-0">
-                        <input type="color" id="text-color-picker" class="absolute -top-2 -left-2 w-16 h-16 cursor-pointer bg-transparent border-0 p-0">
+            
+            <div class="setting-group">
+                <label class="setting-label">Main Text Color</label>
+                <div class="color-input-wrapper">
+                    <div class="color-picker-box">
+                        <input type="color" id="text-color-picker" class="color-picker">
                     </div>
-                    <input type="text" id="text-color-text" class="flex-1 bg-[#3c4043] text-white px-3 py-2 rounded-lg outline-none focus:ring-2 focus:ring-[#a8c7fa] font-mono text-sm uppercase border border-transparent transition-all" maxlength="7" placeholder="#FFFFFF">
+                    <input type="text" id="text-color-text" class="color-text" maxlength="7" placeholder="#FFFFFF">
                 </div>
             </div>
-            <!-- Accent Color -->
-            <div class="mb-6">
-                <label class="block text-sm text-gray-400 mb-2">Accent Color (Equals & Ops)</label>
-                <div class="flex gap-3 items-center">
-                    <div class="relative w-10 h-10 rounded-lg overflow-hidden border border-gray-600 shadow-inner shrink-0">
-                        <input type="color" id="accent-color-picker" class="absolute -top-2 -left-2 w-16 h-16 cursor-pointer bg-transparent border-0 p-0">
+            
+            <div class="setting-group" style="margin-bottom: 1.5rem;">
+                <label class="setting-label">Accent Color (Equals & Ops)</label>
+                <div class="color-input-wrapper">
+                    <div class="color-picker-box">
+                        <input type="color" id="accent-color-picker" class="color-picker">
                     </div>
-                    <input type="text" id="accent-color-text" class="flex-1 bg-[#3c4043] text-white px-3 py-2 rounded-lg outline-none focus:ring-2 focus:ring-[#a8c7fa] font-mono text-sm uppercase border border-transparent transition-all" maxlength="7" placeholder="#a8c7fa">
+                    <input type="text" id="accent-color-text" class="color-text" maxlength="7" placeholder="#A8C7FA">
                 </div>
             </div>
-            <div class="flex justify-between mt-2 pt-4 border-t border-gray-700/50">
-                <button id="reset-colors-btn" class="px-4 py-2 text-sm text-red-400 hover:bg-red-400/10 rounded-lg transition-colors font-medium">Reset Default</button>
-                <button id="close-settings-btn" class="px-5 py-2 text-sm bg-[#a8c7fa] text-gray-900 font-medium hover:bg-[#b9d3fa] rounded-lg transition-colors shadow-[0_2px_10px_0_rgba(168,199,250,0.2)]">Done</button>
+            
+            <div class="modal-actions">
+                <button id="reset-colors-btn" class="btn-reset">Reset Default</button>
+                <button id="close-settings-btn" class="btn-done">Done</button>
             </div>
         </div>
     </div>
@@ -171,103 +483,102 @@
     <!-- Visually hidden H1 for SEO purposes -->
     <h1 class="sr-only">Free Online Calculator with Scientific Functions</h1>
 
-    <!-- Calculator Container -->
-    <main id="calculator" class="flex flex-col w-full h-screen sm:h-auto sm:max-w-md sm:mx-auto sm:rounded-[2.5rem] sm:border-[8px] shadow-2xl relative transition-colors duration-300" style="background-color: var(--calc-color); border-color: var(--calc-color);">
-        
-        <!-- Top Status Bar (Mock for aesthetic on desktop, blends on mobile) -->
-        <div class="h-6 w-full flex justify-center items-center opacity-0 sm:opacity-100 mt-2 pointer-events-none">
-            <div class="w-16 h-1.5 bg-gray-600 rounded-full"></div>
-        </div>
-
-        <!-- Display Area -->
-        <div class="flex-1 flex flex-col justify-end p-6 min-h-[30vh]">
-            <!-- History / Previous expressions -->
-            <div id="history-display" class="flex flex-col justify-end text-gray-500 text-right text-base h-12 mb-2 overflow-y-hidden overflow-x-auto no-scrollbar whitespace-nowrap tracking-wider font-light gap-1">
-                <!-- History appears here -->
+    <div class="app-wrapper">
+        <!-- Calculator Container -->
+        <main id="calculator" class="calc-container">
+            
+            <!-- Top Status Bar (Mock) -->
+            <div class="status-bar-mock">
+                <div class="status-pill"></div>
             </div>
-            
-            <!-- Current Input / Result -->
-            <div class="flex flex-col items-end w-full relative">
-                <div id="main-display" class="theme-text text-right text-6xl font-light w-full overflow-x-auto no-scrollbar whitespace-nowrap outline-none" dir="ltr">
-                    0
+
+            <!-- Display Area -->
+            <div class="display-area">
+                <!-- History / Previous expressions -->
+                <div id="history-display" class="history-display no-scrollbar">
+                    <!-- History appears here -->
                 </div>
-                <!-- Live Result Display -->
-                <div id="live-result-display" class="live-result-accent text-right text-2xl font-light w-full mt-1 opacity-0 transition-opacity duration-200">
+                
+                <!-- Current Input / Result -->
+                <div class="main-display-wrapper">
+                    <div id="main-display" class="main-display text-6xl no-scrollbar" dir="ltr">
+                        0
+                    </div>
+                    <!-- Live Result Display -->
+                    <div id="live-result-display" class="live-result-display">
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Divider -->
-        <div class="w-full h-[1px] bg-gray-700/50 mb-2"></div>
+            <!-- Divider -->
+            <div class="divider"></div>
 
-        <!-- Scientific Mode Toggle -->
-        <div class="px-4 py-1 flex justify-between items-center text-sm font-medium text-gray-400">
-            <button id="deg-rad-btn" class="px-3 py-1 rounded-full theme-btn theme-text transition-colors">RAD</button>
-            <button id="sci-toggle" class="px-3 py-1 rounded-full theme-btn transition-colors flex items-center gap-1">
-                <i data-lucide="chevron-up" class="w-4 h-4 transition-transform duration-300" id="sci-icon"></i>
-                <span id="sci-text">Scientific</span>
-            </button>
-        </div>
+            <!-- Scientific Mode Toggle -->
+            <div class="mode-toggle-bar">
+                <button id="deg-rad-btn" class="pill-btn theme-btn">RAD</button>
+                <button id="sci-toggle" class="pill-btn theme-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon icon-sm" id="sci-icon"><path d="m18 15-6-6-6 6"></path></svg>
+                    <span id="sci-text">Scientific</span>
+                </button>
+            </div>
 
-        <!-- Scientific Panel (Collapsible) -->
-        <div id="scientific-panel" class="scientific-drawer px-4 grid grid-cols-5 gap-2 pb-2">
-            <button class="calc-btn sci-btn theme-btn theme-text rounded-full aspect-square flex items-center justify-center text-sm font-medium" data-val="sin(">sin</button>
-            <button class="calc-btn sci-btn theme-btn theme-text rounded-full aspect-square flex items-center justify-center text-sm font-medium" data-val="cos(">cos</button>
-            <button class="calc-btn sci-btn theme-btn theme-text rounded-full aspect-square flex items-center justify-center text-sm font-medium" data-val="tan(">tan</button>
-            <button class="calc-btn sci-btn theme-btn theme-text rounded-full aspect-square flex items-center justify-center text-sm font-medium" data-val="ln(">ln</button>
-            <button class="calc-btn sci-btn theme-btn theme-text rounded-full aspect-square flex items-center justify-center text-sm font-medium" data-val="log(">log</button>
-            
-            <button class="calc-btn sci-btn theme-btn theme-text rounded-full aspect-square flex items-center justify-center text-sm font-medium" data-val="π">π</button>
-            <button class="calc-btn sci-btn theme-btn theme-text rounded-full aspect-square flex items-center justify-center text-sm font-medium" data-val="e">e</button>
-            <button class="calc-btn sci-btn theme-btn theme-text rounded-full aspect-square flex items-center justify-center text-sm font-medium" data-val="^">^</button>
-            <button class="calc-btn sci-btn theme-btn theme-text rounded-full aspect-square flex items-center justify-center text-sm font-medium" data-val="√(">√</button>
-            <button class="calc-btn sci-btn theme-btn theme-text rounded-full aspect-square flex items-center justify-center text-sm font-medium" data-val="!">!</button>
-        </div>
+            <!-- Scientific Panel (Collapsible) -->
+            <div id="scientific-panel" class="scientific-drawer">
+                <button class="calc-btn sci-btn theme-btn btn-text-sm" data-val="sin(">sin</button>
+                <button class="calc-btn sci-btn theme-btn btn-text-sm" data-val="cos(">cos</button>
+                <button class="calc-btn sci-btn theme-btn btn-text-sm" data-val="tan(">tan</button>
+                <button class="calc-btn sci-btn theme-btn btn-text-sm" data-val="ln(">ln</button>
+                <button class="calc-btn sci-btn theme-btn btn-text-sm" data-val="log(">log</button>
+                
+                <button class="calc-btn sci-btn theme-btn btn-text-sm" data-val="π">π</button>
+                <button class="calc-btn sci-btn theme-btn btn-text-sm" data-val="e">e</button>
+                <button class="calc-btn sci-btn theme-btn btn-text-sm" data-val="^">^</button>
+                <button class="calc-btn sci-btn theme-btn btn-text-sm" data-val="√(">√</button>
+                <button class="calc-btn sci-btn theme-btn btn-text-sm" data-val="!">!</button>
+            </div>
 
-        <!-- Main Keypad -->
-        <div class="grid grid-cols-4 gap-3 p-4 pb-8 sm:pb-6">
-            <!-- Row 1 -->
-            <button class="calc-btn action-btn bg-[#5f6368] hover:bg-[#73777c] theme-accent-text rounded-full aspect-square flex items-center justify-center text-2xl" id="btn-clear">AC</button>
-            <button class="calc-btn input-btn theme-btn theme-text rounded-full aspect-square flex items-center justify-center text-2xl" data-val="(">(</button>
-            <button class="calc-btn input-btn theme-btn theme-text rounded-full aspect-square flex items-center justify-center text-2xl" data-val=")">)</button>
-            <button class="calc-btn input-btn theme-btn theme-accent-text rounded-full aspect-square flex items-center justify-center text-3xl" data-val="÷">÷</button>
-            
-            <!-- Row 2 -->
-            <button class="calc-btn input-btn theme-btn theme-text rounded-full aspect-square flex items-center justify-center text-3xl" data-val="7">7</button>
-            <button class="calc-btn input-btn theme-btn theme-text rounded-full aspect-square flex items-center justify-center text-3xl" data-val="8">8</button>
-            <button class="calc-btn input-btn theme-btn theme-text rounded-full aspect-square flex items-center justify-center text-3xl" data-val="9">9</button>
-            <button class="calc-btn input-btn theme-btn theme-accent-text rounded-full aspect-square flex items-center justify-center text-3xl" data-val="×">×</button>
-            
-            <!-- Row 3 -->
-            <button class="calc-btn input-btn theme-btn theme-text rounded-full aspect-square flex items-center justify-center text-3xl" data-val="4">4</button>
-            <button class="calc-btn input-btn theme-btn theme-text rounded-full aspect-square flex items-center justify-center text-3xl" data-val="5">5</button>
-            <button class="calc-btn input-btn theme-btn theme-text rounded-full aspect-square flex items-center justify-center text-3xl" data-val="6">6</button>
-            <button class="calc-btn input-btn theme-btn theme-accent-text rounded-full aspect-square flex items-center justify-center text-4xl pb-1" data-val="-">−</button>
-            
-            <!-- Row 4 -->
-            <button class="calc-btn input-btn theme-btn theme-text rounded-full aspect-square flex items-center justify-center text-3xl" data-val="1">1</button>
-            <button class="calc-btn input-btn theme-btn theme-text rounded-full aspect-square flex items-center justify-center text-3xl" data-val="2">2</button>
-            <button class="calc-btn input-btn theme-btn theme-text rounded-full aspect-square flex items-center justify-center text-3xl" data-val="3">3</button>
-            <button class="calc-btn input-btn theme-btn theme-accent-text rounded-full aspect-square flex items-center justify-center text-3xl" data-val="+">+</button>
-            
-            <!-- Row 5 -->
-            <button class="calc-btn input-btn theme-btn theme-text rounded-full aspect-square flex items-center justify-center text-3xl" data-val="0">0</button>
-            <button class="calc-btn input-btn theme-btn theme-text rounded-full aspect-square flex items-center justify-center text-3xl" data-val=".">.</button>
-            
-            <!-- Backspace button -->
-            <button class="calc-btn action-btn theme-btn theme-accent-text rounded-full aspect-square flex items-center justify-center" id="btn-backspace">
-                <i data-lucide="delete" class="w-7 h-7"></i>
-            </button>
-            
-            <!-- Equals button (Accent Color) -->
-        <button class="calc-btn theme-accent-bg text-gray-900 rounded-full aspect-square flex items-center justify-center text-4xl shadow-lg" id="btn-equals">=</button>
+            <!-- Main Keypad -->
+            <div class="keypad">
+                <!-- Row 1 -->
+                <button class="calc-btn action-btn btn-text-2xl" id="btn-clear">AC</button>
+                <button class="calc-btn input-btn theme-btn btn-text-2xl" data-val="(">(</button>
+                <button class="calc-btn input-btn theme-btn btn-text-2xl" data-val=")">)</button>
+                <button class="calc-btn input-btn theme-btn theme-accent-text btn-text-3xl" data-val="÷">÷</button>
+                
+                <!-- Row 2 -->
+                <button class="calc-btn input-btn theme-btn btn-text-3xl" data-val="7">7</button>
+                <button class="calc-btn input-btn theme-btn btn-text-3xl" data-val="8">8</button>
+                <button class="calc-btn input-btn theme-btn btn-text-3xl" data-val="9">9</button>
+                <button class="calc-btn input-btn theme-btn theme-accent-text btn-text-3xl" data-val="×">×</button>
+                
+                <!-- Row 3 -->
+                <button class="calc-btn input-btn theme-btn btn-text-3xl" data-val="4">4</button>
+                <button class="calc-btn input-btn theme-btn btn-text-3xl" data-val="5">5</button>
+                <button class="calc-btn input-btn theme-btn btn-text-3xl" data-val="6">6</button>
+                <button class="calc-btn input-btn theme-btn theme-accent-text btn-text-4xl" data-val="-">−</button>
+                
+                <!-- Row 4 -->
+                <button class="calc-btn input-btn theme-btn btn-text-3xl" data-val="1">1</button>
+                <button class="calc-btn input-btn theme-btn btn-text-3xl" data-val="2">2</button>
+                <button class="calc-btn input-btn theme-btn btn-text-3xl" data-val="3">3</button>
+                <button class="calc-btn input-btn theme-btn theme-accent-text btn-text-3xl" data-val="+">+</button>
+                
+                <!-- Row 5 -->
+                <button class="calc-btn input-btn theme-btn btn-text-3xl" data-val="0">0</button>
+                <button class="calc-btn input-btn theme-btn btn-text-3xl" data-val=".">.</button>
+                
+                <!-- Backspace button -->
+                <button class="calc-btn action-btn theme-btn theme-accent-text" id="btn-backspace">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon icon-lg"><path d="M20 5H9l-7 7 7 7h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2Z"></path><line x1="18" x2="12" y1="9" y2="15"></line><line x1="12" x2="18" y1="9" y2="15"></line></svg>
+                </button>
+                
+                <!-- Equals button (Accent Color) -->
+                <button class="calc-btn equals-btn" id="btn-equals">=</button>
+            </div>
+        </main>
     </div>
-</main>
 
 <script>
-    // Initialize Icons
-    lucide.createIcons();
-
     // State Management
     let currentInput = '';
     let historyList = [];
@@ -278,7 +589,7 @@
     let btnColor = '#3c4043';
     let accentColor = '#a8c7fa';
     let textColor = '#ffffff';
-    const STORAGE_KEY = 'android_calc_state';
+    const STORAGE_KEY = 'online_calc_state_v2';
 
     // DOM Elements
     const mainDisplay = document.getElementById('main-display');
@@ -293,7 +604,6 @@
     // Settings Elements
     const settingsBtn = document.getElementById('settings-btn');
     const settingsModal = document.getElementById('settings-modal');
-    const settingsContent = document.getElementById('settings-content');
     const closeSettingsBtn = document.getElementById('close-settings-btn');
     const resetColorsBtn = document.getElementById('reset-colors-btn');
     const bgColorPicker = document.getElementById('bg-color-picker');
@@ -373,214 +683,214 @@
 
     // --- Core Calculator Logic ---
 
-        // Factorial helper
-        function factorial(n) {
-            if (n < 0) return NaN;
-            if (n === 0 || n === 1) return 1;
-            let res = 1;
-            for (let i = 2; i <= n; i++) res *= i;
-            return res;
+    // Factorial helper
+    function factorial(n) {
+        if (n < 0) return NaN;
+        if (n === 0 || n === 1) return 1;
+        let res = 1;
+        for (let i = 2; i <= n; i++) res *= i;
+        return res;
+    }
+
+    // Safely evaluate mathematical expressions
+    function evaluateExpression(expr) {
+        if (!expr) return '';
+
+        let parsedExpr = expr
+            .replace(/×/g, '*')
+            .replace(/÷/g, '/')
+            .replace(/−/g, '-')
+            .replace(/π/g, 'Math.PI')
+            .replace(/e/g, 'Math.E')
+            .replace(/\^/g, '**')
+            .replace(/%/g, '/100');
+
+        // Handle Factorials (basic integer match)
+        parsedExpr = parsedExpr.replace(/(\d+)!/g, (match, num) => {
+            return `factorial(${num})`;
+        });
+
+        // Scientific functions
+        const trigScale = isRadians ? 1 : (Math.PI / 180);
+        
+        // Map standard math functions
+        parsedExpr = parsedExpr.replace(/sin\(/g, `Math.sin(${trigScale}*`);
+        parsedExpr = parsedExpr.replace(/cos\(/g, `Math.cos(${trigScale}*`);
+        parsedExpr = parsedExpr.replace(/tan\(/g, `Math.tan(${trigScale}*`);
+        parsedExpr = parsedExpr.replace(/ln\(/g, 'Math.log(');
+        parsedExpr = parsedExpr.replace(/log\(/g, 'Math.log10(');
+        parsedExpr = parsedExpr.replace(/√\(/g, 'Math.sqrt(');
+
+        // Auto-close missing parentheses for evaluation
+        let openParens = (parsedExpr.match(/\(/g) || []).length;
+        let closeParens = (parsedExpr.match(/\)/g) || []).length;
+        while (openParens > closeParens) {
+            parsedExpr += ')';
+            closeParens++;
         }
 
-        // Safely evaluate mathematical expressions
-        function evaluateExpression(expr) {
-            if (!expr) return '';
-
-            let parsedExpr = expr
-                .replace(/×/g, '*')
-                .replace(/÷/g, '/')
-                .replace(/−/g, '-')
-                .replace(/π/g, 'Math.PI')
-                .replace(/e/g, 'Math.E')
-                .replace(/\^/g, '**')
-                .replace(/%/g, '/100');
-
-            // Handle Factorials (basic integer match)
-            parsedExpr = parsedExpr.replace(/(\d+)!/g, (match, num) => {
-                return `factorial(${num})`;
-            });
-
-            // Scientific functions
-            const trigScale = isRadians ? 1 : (Math.PI / 180);
+        try {
+            // Using Function instead of raw eval for a slightly safer scope boundary
+            // We pass in Math object equivalents implicitly via the string replacements
+            let result = new Function('factorial', `return ${parsedExpr}`)(factorial);
             
-            // Map standard math functions
-            parsedExpr = parsedExpr.replace(/sin\(/g, `Math.sin(${trigScale}*`);
-            parsedExpr = parsedExpr.replace(/cos\(/g, `Math.cos(${trigScale}*`);
-            parsedExpr = parsedExpr.replace(/tan\(/g, `Math.tan(${trigScale}*`);
-            parsedExpr = parsedExpr.replace(/ln\(/g, 'Math.log(');
-            parsedExpr = parsedExpr.replace(/log\(/g, 'Math.log10(');
-            parsedExpr = parsedExpr.replace(/√\(/g, 'Math.sqrt(');
-
-            // Auto-close missing parentheses for evaluation
-            let openParens = (parsedExpr.match(/\(/g) || []).length;
-            let closeParens = (parsedExpr.match(/\)/g) || []).length;
-            while (openParens > closeParens) {
-                parsedExpr += ')';
-                closeParens++;
+            // Handle float precision issues (e.g., 0.1 + 0.2 = 0.30000000000000004)
+            if (typeof result === 'number') {
+                if (!isFinite(result)) return 'Error';
+                // Round to 10 decimal places to eliminate typical JS floating point errors
+                result = Math.round(result * 1e10) / 1e10; 
+                return result.toString();
             }
-
-            try {
-                // Using Function instead of raw eval for a slightly safer scope boundary
-                // We pass in Math object equivalents implicitly via the string replacements
-                let result = new Function('factorial', `return ${parsedExpr}`)(factorial);
-                
-                // Handle float precision issues (e.g., 0.1 + 0.2 = 0.30000000000000004)
-                if (typeof result === 'number') {
-                    if (!isFinite(result)) return 'Error';
-                    // Round to 10 decimal places to eliminate typical JS floating point errors
-                    result = Math.round(result * 1e10) / 1e10; 
-                    return result.toString();
-                }
-                return result;
-            } catch (error) {
-                return 'Error';
-            }
+            return result;
+        } catch (error) {
+            return 'Error';
         }
+    }
 
-        // Update UI displays
-        function updateDisplay() {
-            // Update Clear Button Text (AC vs C)
-            btnClear.textContent = currentInput === '' && historyList.length === 0 ? 'AC' : 'C';
+    // Update UI displays
+    function updateDisplay() {
+        // Update Clear Button Text (AC vs C)
+        btnClear.textContent = currentInput === '' && historyList.length === 0 ? 'AC' : 'C';
 
-            // Format main display
-            if (currentInput === '') {
-                mainDisplay.textContent = '0';
-                liveResultDisplay.style.opacity = '0';
-                liveResultDisplay.textContent = '';
-            } else {
-                mainDisplay.textContent = currentInput;
-                
-                // Live evaluation preview
-                if (!isCalculated) {
-                    const liveResult = evaluateExpression(currentInput);
-                    // Only show live preview if it's a valid result, not an error, 
-                    // and not identical to the current input (e.g. typing "5" shouldn't show "= 5")
-                    if (liveResult !== 'Error' && liveResult !== '' && liveResult.toString() !== currentInput) {
-                        liveResultDisplay.textContent = '= ' + liveResult;
-                        liveResultDisplay.style.opacity = '1';
-                    } else {
-                        liveResultDisplay.style.opacity = '0';
-                    }
+        // Format main display
+        if (currentInput === '') {
+            mainDisplay.textContent = '0';
+            liveResultDisplay.style.opacity = '0';
+            liveResultDisplay.textContent = '';
+        } else {
+            mainDisplay.textContent = currentInput;
+            
+            // Live evaluation preview
+            if (!isCalculated) {
+                const liveResult = evaluateExpression(currentInput);
+                // Only show live preview if it's a valid result, not an error, 
+                // and not identical to the current input (e.g. typing "5" shouldn't show "= 5")
+                if (liveResult !== 'Error' && liveResult !== '' && liveResult.toString() !== currentInput) {
+                    liveResultDisplay.textContent = '= ' + liveResult;
+                    liveResultDisplay.style.opacity = '1';
                 } else {
-                    liveResultDisplay.style.opacity = '0'; // Hide live result if already calculated
-                }
-            }
-            
-            historyDisplay.innerHTML = historyList.map(item => `<div>${item}</div>`).join('');
-            historyDisplay.scrollTop = historyDisplay.scrollHeight;
-            
-            // Auto scroll to end
-            mainDisplay.scrollLeft = mainDisplay.scrollWidth;
-            
-            // Adjust font size dynamically for long numbers
-            if (mainDisplay.textContent.length > 10) {
-                mainDisplay.classList.remove('text-6xl');
-                mainDisplay.classList.add('text-4xl');
-                if(mainDisplay.textContent.length > 15) {
-                    mainDisplay.classList.remove('text-4xl');
-                    mainDisplay.classList.add('text-3xl');
+                    liveResultDisplay.style.opacity = '0';
                 }
             } else {
-                mainDisplay.classList.remove('text-3xl', 'text-4xl');
-                mainDisplay.classList.add('text-6xl');
+                liveResultDisplay.style.opacity = '0'; // Hide live result if already calculated
             }
-
-            saveState();
+        }
+        
+        historyDisplay.innerHTML = historyList.map(item => `<div>${item}</div>`).join('');
+        historyDisplay.scrollTop = historyDisplay.scrollHeight;
+        
+        // Auto scroll to end
+        mainDisplay.scrollLeft = mainDisplay.scrollWidth;
+        
+        // Adjust font size dynamically for long numbers
+        if (mainDisplay.textContent.length > 10) {
+            mainDisplay.classList.remove('text-6xl');
+            mainDisplay.classList.add('text-4xl');
+            if(mainDisplay.textContent.length > 15) {
+                mainDisplay.classList.remove('text-4xl');
+                mainDisplay.classList.add('text-3xl');
+            }
+        } else {
+            mainDisplay.classList.remove('text-3xl', 'text-4xl');
+            mainDisplay.classList.add('text-6xl');
         }
 
-        // Handle generic input appending
-        function handleInput(val) {
-            // Reset if typing after a calculation (unless it's an operator)
-            if (isCalculated) {
-                if (['+', '−', '×', '÷', '^', '%'].includes(val)) {
-                    isCalculated = false;
-                } else {
-                    currentInput = '';
-                    isCalculated = false;
-                }
-            }
-            currentInput += val;
-            updateDisplay();
-        }
+        saveState();
+    }
 
-        // Handle calculation (=)
-        function handleCalculate() {
-            if (!currentInput) return;
-            
-            const result = evaluateExpression(currentInput);
-            if (result !== 'Error') {
-                historyList.push(currentInput + ' = ' + result);
-                if (historyList.length > 2) {
-                    historyList.shift(); // Keep only the last 2 calculations
-                }
-            }
-            currentInput = result.toString();
-            isCalculated = true;
-            updateDisplay();
-        }
-
-        // Handle Delete / Backspace
-        function handleDelete() {
-            if (isCalculated) {
+    // Handle generic input appending
+    function handleInput(val) {
+        // Reset if typing after a calculation (unless it's an operator)
+        if (isCalculated) {
+            if (['+', '−', '×', '÷', '^', '%'].includes(val)) {
                 isCalculated = false;
-            }
-            if (currentInput.length > 0) {
-                // Check if deleting a scientific function word (like "sin(")
-                const scientificFuncs = ['sin(', 'cos(', 'tan(', 'log(', 'ln(', '√('];
-                let deletedFunc = false;
-                
-                for (let func of scientificFuncs) {
-                    if (currentInput.endsWith(func)) {
-                        currentInput = currentInput.slice(0, -func.length);
-                        deletedFunc = true;
-                        break;
-                    }
-                }
-                
-                if (!deletedFunc) {
-                    currentInput = currentInput.slice(0, -1);
-                }
-            }
-            updateDisplay();
-        }
-
-        // Handle Clear (AC/C)
-        function handleClear() {
-            if (currentInput === '') {
-                historyList = [];
             } else {
                 currentInput = '';
+                isCalculated = false;
             }
+        }
+        currentInput += val;
+        updateDisplay();
+    }
+
+    // Handle calculation (=)
+    function handleCalculate() {
+        if (!currentInput) return;
+        
+        const result = evaluateExpression(currentInput);
+        if (result !== 'Error') {
+            historyList.push(currentInput + ' = ' + result);
+            if (historyList.length > 2) {
+                historyList.shift(); // Keep only the last 2 calculations
+            }
+        }
+        currentInput = result.toString();
+        isCalculated = true;
+        updateDisplay();
+    }
+
+    // Handle Delete / Backspace
+    function handleDelete() {
+        if (isCalculated) {
             isCalculated = false;
-            updateDisplay();
         }
-
-        // --- Event Listeners ---
-
-        // Bind standard and scientific input buttons
-        document.querySelectorAll('.input-btn, .sci-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const val = e.currentTarget.getAttribute('data-val');
-                handleInput(val);
-            });
-        });
-
-        // Action Buttons
-        document.getElementById('btn-equals').addEventListener('click', handleCalculate);
-        document.getElementById('btn-backspace').addEventListener('click', handleDelete);
-        btnClear.addEventListener('click', handleClear);
-
-        // Deg/Rad Toggle
-        function updateDegRadButton() {
-            degRadBtn.textContent = isRadians ? 'RAD' : 'DEG';
+        if (currentInput.length > 0) {
+            // Check if deleting a scientific function word (like "sin(")
+            const scientificFuncs = ['sin(', 'cos(', 'tan(', 'log(', 'ln(', '√('];
+            let deletedFunc = false;
+            
+            for (let func of scientificFuncs) {
+                if (currentInput.endsWith(func)) {
+                    currentInput = currentInput.slice(0, -func.length);
+                    deletedFunc = true;
+                    break;
+                }
+            }
+            
+            if (!deletedFunc) {
+                currentInput = currentInput.slice(0, -1);
+            }
         }
-        degRadBtn.addEventListener('click', () => {
-            isRadians = !isRadians;
-            updateDegRadButton();
-            saveState();
-        });
+        updateDisplay();
+    }
 
-        // Scientific Panel Toggle
+    // Handle Clear (AC/C)
+    function handleClear() {
+        if (currentInput === '') {
+            historyList = [];
+        } else {
+            currentInput = '';
+        }
+        isCalculated = false;
+        updateDisplay();
+    }
+
+    // --- Event Listeners ---
+
+    // Bind standard and scientific input buttons
+    document.querySelectorAll('.input-btn, .sci-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const val = e.currentTarget.getAttribute('data-val');
+            handleInput(val);
+        });
+    });
+
+    // Action Buttons
+    document.getElementById('btn-equals').addEventListener('click', handleCalculate);
+    document.getElementById('btn-backspace').addEventListener('click', handleDelete);
+    btnClear.addEventListener('click', handleClear);
+
+    // Deg/Rad Toggle
+    function updateDegRadButton() {
+        degRadBtn.textContent = isRadians ? 'RAD' : 'DEG';
+    }
+    degRadBtn.addEventListener('click', () => {
+        isRadians = !isRadians;
+        updateDegRadButton();
+        saveState();
+    });
+
+    // Scientific Panel Toggle
     sciToggleBtn.addEventListener('click', () => {
         sciPanel.classList.toggle('open');
         if (sciPanel.classList.contains('open')) {
@@ -594,13 +904,11 @@
 
     // --- Settings Event Listeners ---
     function openSettings() {
-        settingsModal.classList.remove('opacity-0', 'pointer-events-none');
-        settingsContent.classList.remove('scale-95');
+        settingsModal.classList.add('open');
     }
 
     function closeSettings() {
-        settingsModal.classList.add('opacity-0', 'pointer-events-none');
-        settingsContent.classList.add('scale-95');
+        settingsModal.classList.remove('open');
     }
 
     settingsBtn.addEventListener('click', openSettings);
@@ -702,65 +1010,65 @@
         if (e.target.tagName === 'INPUT') return;
 
         // Prevent zooming with Ctrl/Cmd + +/-, or other unwanted default browser shortcuts
-            if (e.ctrlKey || e.metaKey) {
-                if (['+', '-', '=', '0', '_'].includes(e.key)) {
-                    e.preventDefault();
-                }
-            }
-
-            // Prevent default behavior for specific keys to avoid scrolling/find
-            if (['Enter', 'Backspace', 'Escape', ' '].includes(e.key)) {
-                if (e.key === ' ') e.preventDefault(); // Prevent space from triggering focused buttons
-            }
-
-            const keyMap = {
-                '0': '0', '1': '1', '2': '2', '3': '3', '4': '4',
-                '5': '5', '6': '6', '7': '7', '8': '8', '9': '9',
-                '.': '.',
-                '+': '+',
-                '-': '−',
-                '*': '×',
-                'x': '×',
-                'X': '×',
-                '/': '÷',
-                '%': '%',
-                '(': '(',
-                ')': ')',
-                '^': '^'
-            };
-
-            // Catch the key and strictly stop the browser from using it for zooming/finding/scrolling
-            if (keyMap[e.key]) {
-                e.preventDefault(); 
-                handleInput(keyMap[e.key]);
-            } else if (e.key === 'Enter' || e.key === '=') {
-                e.preventDefault();
-                handleCalculate();
-            } else if (e.key === 'Backspace') {
-                e.preventDefault();
-                handleDelete();
-            } else if (e.key === 'Escape') {
-                e.preventDefault();
-                handleClear();
-            } else if (e.key.toLowerCase() === 'p') {
-                e.preventDefault();
-                handleInput('π');
-            } else if (e.key.toLowerCase() === 'e') {
-                e.preventDefault();
-                handleInput('e');
-            }
-        });
-
-        // Prevent zoom via mouse wheel + Ctrl
-        document.addEventListener('wheel', (e) => {
-            if (e.ctrlKey || e.metaKey) {
+        if (e.ctrlKey || e.metaKey) {
+            if (['+', '-', '=', '0', '_'].includes(e.key)) {
                 e.preventDefault();
             }
-        }, { passive: false });
+        }
 
-        // Initialize App
-        loadState();
-        updateDisplay();
-    </script>
+        // Prevent default behavior for specific keys to avoid scrolling/find
+        if (['Enter', 'Backspace', 'Escape', ' '].includes(e.key)) {
+            if (e.key === ' ') e.preventDefault(); // Prevent space from triggering focused buttons
+        }
+
+        const keyMap = {
+            '0': '0', '1': '1', '2': '2', '3': '3', '4': '4',
+            '5': '5', '6': '6', '7': '7', '8': '8', '9': '9',
+            '.': '.',
+            '+': '+',
+            '-': '−',
+            '*': '×',
+            'x': '×',
+            'X': '×',
+            '/': '÷',
+            '%': '%',
+            '(': '(',
+            ')': ')',
+            '^': '^'
+        };
+
+        // Catch the key and strictly stop the browser from using it for zooming/finding/scrolling
+        if (keyMap[e.key]) {
+            e.preventDefault(); 
+            handleInput(keyMap[e.key]);
+        } else if (e.key === 'Enter' || e.key === '=') {
+            e.preventDefault();
+            handleCalculate();
+        } else if (e.key === 'Backspace') {
+            e.preventDefault();
+            handleDelete();
+        } else if (e.key === 'Escape') {
+            e.preventDefault();
+            handleClear();
+        } else if (e.key.toLowerCase() === 'p') {
+            e.preventDefault();
+            handleInput('π');
+        } else if (e.key.toLowerCase() === 'e') {
+            e.preventDefault();
+            handleInput('e');
+        }
+    });
+
+    // Prevent zoom via mouse wheel + Ctrl
+    document.addEventListener('wheel', (e) => {
+        if (e.ctrlKey || e.metaKey) {
+            e.preventDefault();
+        }
+    }, { passive: false });
+
+    // Initialize App
+    loadState();
+    updateDisplay();
+</script>
 </body>
 </html>
