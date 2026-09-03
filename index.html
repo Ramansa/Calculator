@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Free Online Calculator | Scientific & Basic</title>
     <meta name="description" content="A free, fast, and responsive online calculator. Features basic math, scientific functions, history, and full keyboard support.">
     <meta name="keywords" content="calculator, online calculator, scientific calculator, free math calculator, web app">
@@ -48,6 +48,7 @@
             align-items: center;
             justify-content: center;
             min-height: 100vh;
+            min-height: 100dvh;
             width: 100%;
         }
 
@@ -56,6 +57,7 @@
             flex-direction: column;
             width: 100%;
             height: 100vh;
+            height: 100dvh;
             background-color: var(--calc-color);
             position: relative;
             transition: background-color 0.3s, border-color 0.3s;
@@ -261,38 +263,58 @@
         .theme-text { color: var(--text-color); transition: color 0.2s; }
 
         /* --- Icons --- */
-        .icon { width: 1.5rem; height: 1.5rem; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+        .icon { width: 1.35rem; height: 1.35rem; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
         .icon-sm { width: 1rem; height: 1rem; transition: transform 0.3s ease; }
         .icon-lg { width: 1.75rem; height: 1.75rem; }
 
-        /* --- Settings UI --- */
+        /* --- Top Action Header (Settings & Fullscreen) --- */
+        .top-actions {
+            position: fixed;
+            top: max(0.75rem, env(safe-area-inset-top, 0.75rem));
+            right: max(0.75rem, env(safe-area-inset-right, 0.75rem));
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            z-index: 40;
+        }
+
+        .header-icon-btn {
+            width: 2.65rem;
+            height: 2.65rem;
+            border-radius: 50%;
+            background-color: rgba(31, 41, 55, 0.82);
+            color: #9ca3af;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+            transition: color 0.2s ease, background-color 0.2s ease, transform 0.15s ease;
+            touch-action: manipulation;
+        }
+        .header-icon-btn:hover { 
+            color: #ffffff; 
+            background-color: rgba(55, 65, 81, 0.95); 
+        }
+        .header-icon-btn:active {
+            transform: scale(0.92);
+        }
+
         .sr-only {
             position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
             overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border-width: 0;
         }
 
-        .settings-btn {
-            position: fixed;
-            top: 1rem;
-            right: 1rem;
-            padding: 0.5rem;
-            border-radius: 50%;
-            background-color: rgba(31, 41, 55, 0.8);
-            color: #9ca3af;
-            border: none;
-            cursor: pointer;
-            z-index: 40;
-            backdrop-filter: blur(4px);
-            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
-            transition: color 0.2s, background-color 0.2s;
-        }
-        .settings-btn:hover { color: #ffffff; background-color: rgba(55, 65, 81, 1); }
-
+        /* --- Settings Modal UI --- */
         .modal-overlay {
             position: fixed;
             inset: 0;
             background-color: rgba(0, 0, 0, 0.6);
             backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -305,11 +327,11 @@
 
         .modal-content {
             background-color: #202124;
-            border-radius: 1rem;
+            border-radius: 1.25rem;
             padding: 1.5rem;
             width: 91.666%;
             max-width: 24rem;
-            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.6);
             border: 1px solid #374151;
             transform: scale(0.95);
             transition: transform 0.3s;
@@ -410,10 +432,24 @@
 </head>
 <body>
 
-    <!-- Settings Button -->
-    <button id="settings-btn" class="settings-btn" aria-label="Settings">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-    </button>
+    <!-- Top Action Buttons (Fullscreen + Settings) -->
+    <header class="top-actions">
+        <!-- Fullscreen Button -->
+        <button id="fullscreen-btn" class="header-icon-btn" aria-label="Toggle Fullscreen" title="Toggle Fullscreen">
+            <!-- Default: Enter Fullscreen Icon -->
+            <svg id="fullscreen-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon">
+                <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+            </svg>
+        </button>
+
+        <!-- Settings Button -->
+        <button id="settings-btn" class="header-icon-btn" aria-label="Settings" title="Settings">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon">
+                <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+            </svg>
+        </button>
+    </header>
 
     <!-- Settings Modal -->
     <div id="settings-modal" class="modal-overlay">
@@ -568,12 +604,12 @@
                 <button class="calc-btn input-btn theme-btn btn-text-3xl" data-val=".">.</button>
                 
                 <!-- Backspace button -->
-                <button class="calc-btn action-btn theme-btn theme-accent-text" id="btn-backspace">
+                <button class="calc-btn action-btn theme-btn theme-accent-text" id="btn-backspace" aria-label="Backspace">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon icon-lg"><path d="M20 5H9l-7 7 7 7h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2Z"></path><line x1="18" x2="12" y1="9" y2="15"></line><line x1="12" x2="18" y1="9" y2="15"></line></svg>
                 </button>
                 
                 <!-- Equals button (Accent Color) -->
-                <button class="calc-btn equals-btn" id="btn-equals">=</button>
+                <button class="calc-btn equals-btn" id="btn-equals" aria-label="Calculate">=</button>
             </div>
         </main>
     </div>
@@ -601,6 +637,10 @@
     const degRadBtn = document.getElementById('deg-rad-btn');
     const btnClear = document.getElementById('btn-clear');
 
+    // Fullscreen Elements
+    const fullscreenBtn = document.getElementById('fullscreen-btn');
+    const fullscreenIcon = document.getElementById('fullscreen-icon');
+
     // Settings Elements
     const settingsBtn = document.getElementById('settings-btn');
     const settingsModal = document.getElementById('settings-modal');
@@ -616,6 +656,56 @@
     const accentColorText = document.getElementById('accent-color-text');
     const textColorPicker = document.getElementById('text-color-picker');
     const textColorText = document.getElementById('text-color-text');
+
+    // Fullscreen Helper Logic
+    function isCurrentlyFullscreen() {
+        return !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement);
+    }
+
+    function updateFullscreenIcon() {
+        if (isCurrentlyFullscreen()) {
+            // Exit fullscreen (Compress/Minimize arrows)
+            fullscreenIcon.innerHTML = '<path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"></path>';
+            fullscreenBtn.setAttribute('title', 'Exit Fullscreen');
+            fullscreenBtn.setAttribute('aria-label', 'Exit Fullscreen');
+        } else {
+            // Enter fullscreen (Expand arrows)
+            fullscreenIcon.innerHTML = '<path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>';
+            fullscreenBtn.setAttribute('title', 'Enter Fullscreen');
+            fullscreenBtn.setAttribute('aria-label', 'Enter Fullscreen');
+        }
+    }
+
+    function toggleFullscreen() {
+        const docEl = document.documentElement;
+        if (!isCurrentlyFullscreen()) {
+            if (docEl.requestFullscreen) {
+                docEl.requestFullscreen().catch(err => console.warn("Fullscreen request error:", err));
+            } else if (docEl.webkitRequestFullscreen) {
+                docEl.webkitRequestFullscreen();
+            } else if (docEl.mozRequestFullScreen) {
+                docEl.mozRequestFullScreen();
+            } else if (docEl.msRequestFullscreen) {
+                docEl.msRequestFullscreen();
+            }
+        } else {
+            if (document.exitFullscreen) {
+                document.exitFullscreen().catch(err => console.warn("Fullscreen exit error:", err));
+            } else if (document.webkitExitFullscreen) {
+                document.webkitExitFullscreen();
+            } else if (document.mozCancelFullScreen) {
+                document.mozCancelFullScreen();
+            } else if (document.msExitFullscreen) {
+                document.msExitFullscreen();
+            }
+        }
+    }
+
+    fullscreenBtn.addEventListener('click', toggleFullscreen);
+
+    ['fullscreenchange', 'webkitfullscreenchange', 'mozfullscreenchange', 'MSFullscreenChange'].forEach(evt => {
+        document.addEventListener(evt, updateFullscreenIcon);
+    });
 
     // Apply Colors Function
     function applyColors() {
@@ -662,7 +752,7 @@
                 console.error("Could not parse saved state");
             }
         }
-        applyColors(); // Ensure color styles are applied at startup
+        applyColors();
     }
 
     // Save State to LocalStorage
@@ -713,7 +803,6 @@
         // Scientific functions
         const trigScale = isRadians ? 1 : (Math.PI / 180);
         
-        // Map standard math functions
         parsedExpr = parsedExpr.replace(/sin\(/g, `Math.sin(${trigScale}*`);
         parsedExpr = parsedExpr.replace(/cos\(/g, `Math.cos(${trigScale}*`);
         parsedExpr = parsedExpr.replace(/tan\(/g, `Math.tan(${trigScale}*`);
@@ -730,14 +819,10 @@
         }
 
         try {
-            // Using Function instead of raw eval for a slightly safer scope boundary
-            // We pass in Math object equivalents implicitly via the string replacements
             let result = new Function('factorial', `return ${parsedExpr}`)(factorial);
             
-            // Handle float precision issues (e.g., 0.1 + 0.2 = 0.30000000000000004)
             if (typeof result === 'number') {
                 if (!isFinite(result)) return 'Error';
-                // Round to 10 decimal places to eliminate typical JS floating point errors
                 result = Math.round(result * 1e10) / 1e10; 
                 return result.toString();
             }
@@ -749,10 +834,8 @@
 
     // Update UI displays
     function updateDisplay() {
-        // Update Clear Button Text (AC vs C)
         btnClear.textContent = currentInput === '' && historyList.length === 0 ? 'AC' : 'C';
 
-        // Format main display
         if (currentInput === '') {
             mainDisplay.textContent = '0';
             liveResultDisplay.style.opacity = '0';
@@ -760,11 +843,8 @@
         } else {
             mainDisplay.textContent = currentInput;
             
-            // Live evaluation preview
             if (!isCalculated) {
                 const liveResult = evaluateExpression(currentInput);
-                // Only show live preview if it's a valid result, not an error, 
-                // and not identical to the current input (e.g. typing "5" shouldn't show "= 5")
                 if (liveResult !== 'Error' && liveResult !== '' && liveResult.toString() !== currentInput) {
                     liveResultDisplay.textContent = '= ' + liveResult;
                     liveResultDisplay.style.opacity = '1';
@@ -772,17 +852,15 @@
                     liveResultDisplay.style.opacity = '0';
                 }
             } else {
-                liveResultDisplay.style.opacity = '0'; // Hide live result if already calculated
+                liveResultDisplay.style.opacity = '0';
             }
         }
         
         historyDisplay.innerHTML = historyList.map(item => `<div>${item}</div>`).join('');
         historyDisplay.scrollTop = historyDisplay.scrollHeight;
         
-        // Auto scroll to end
         mainDisplay.scrollLeft = mainDisplay.scrollWidth;
         
-        // Adjust font size dynamically for long numbers
         if (mainDisplay.textContent.length > 10) {
             mainDisplay.classList.remove('text-6xl');
             mainDisplay.classList.add('text-4xl');
@@ -798,9 +876,7 @@
         saveState();
     }
 
-    // Handle generic input appending
     function handleInput(val) {
-        // Reset if typing after a calculation (unless it's an operator)
         if (isCalculated) {
             if (['+', '−', '×', '÷', '^', '%'].includes(val)) {
                 isCalculated = false;
@@ -813,7 +889,6 @@
         updateDisplay();
     }
 
-    // Handle calculation (=)
     function handleCalculate() {
         if (!currentInput) return;
         
@@ -821,7 +896,7 @@
         if (result !== 'Error') {
             historyList.push(currentInput + ' = ' + result);
             if (historyList.length > 2) {
-                historyList.shift(); // Keep only the last 2 calculations
+                historyList.shift();
             }
         }
         currentInput = result.toString();
@@ -829,13 +904,11 @@
         updateDisplay();
     }
 
-    // Handle Delete / Backspace
     function handleDelete() {
         if (isCalculated) {
             isCalculated = false;
         }
         if (currentInput.length > 0) {
-            // Check if deleting a scientific function word (like "sin(")
             const scientificFuncs = ['sin(', 'cos(', 'tan(', 'log(', 'ln(', '√('];
             let deletedFunc = false;
             
@@ -854,7 +927,6 @@
         updateDisplay();
     }
 
-    // Handle Clear (AC/C)
     function handleClear() {
         if (currentInput === '') {
             historyList = [];
@@ -866,8 +938,6 @@
     }
 
     // --- Event Listeners ---
-
-    // Bind standard and scientific input buttons
     document.querySelectorAll('.input-btn, .sci-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
             const val = e.currentTarget.getAttribute('data-val');
@@ -875,12 +945,10 @@
         });
     });
 
-    // Action Buttons
     document.getElementById('btn-equals').addEventListener('click', handleCalculate);
     document.getElementById('btn-backspace').addEventListener('click', handleDelete);
     btnClear.addEventListener('click', handleClear);
 
-    // Deg/Rad Toggle
     function updateDegRadButton() {
         degRadBtn.textContent = isRadians ? 'RAD' : 'DEG';
     }
@@ -890,7 +958,6 @@
         saveState();
     });
 
-    // Scientific Panel Toggle
     sciToggleBtn.addEventListener('click', () => {
         sciPanel.classList.toggle('open');
         if (sciPanel.classList.contains('open')) {
@@ -914,19 +981,15 @@
     settingsBtn.addEventListener('click', openSettings);
     closeSettingsBtn.addEventListener('click', closeSettings);
     settingsModal.addEventListener('click', (e) => {
-        // Close if clicking the background overlay
         if (e.target === settingsModal) closeSettings();
     });
 
-    // Color Validation & Live Update
     function handleColorInput(val, type) {
         let formattedVal = val.trim();
-        // Auto prepend hashtag for ease of typing
         if (!formattedVal.startsWith('#') && formattedVal.length > 0) {
             formattedVal = '#' + formattedVal;
         }
         
-        // Match 3 or 6 digit hex lengths
         if (/^#([0-9A-F]{3}){1,2}$/i.test(formattedVal)) {
             if (type === 'bg') bgColor = formattedVal;
             else if (type === 'calc') calcColor = formattedVal;
@@ -965,7 +1028,6 @@
     
     // Paste Support
     document.addEventListener('paste', (e) => {
-        // Prevent pasting if inside an input field (like settings)
         if (e.target.tagName === 'INPUT') return;
         
         const clipboardData = e.clipboardData || window.clipboardData;
@@ -973,18 +1035,15 @@
         
         if (!pastedText) return;
         
-        // Sanitize spaces and map operations
         pastedText = pastedText.replace(/\s+/g, '')
                                .replace(/\*/g, '×')
                                .replace(/\//g, '÷')
                                .replace(/-/g, '−');
                                
-        // Validate characters
         const validChars = /^[0-9.÷×−+()^%πe!cossintanlogln√]+$/i;
         if (validChars.test(pastedText)) {
             e.preventDefault();
             
-            // If starting fresh and pasting a calculation
             if (isCalculated) {
                 currentInput = '';
                 isCalculated = false;
@@ -993,12 +1052,10 @@
             currentInput += pastedText;
             updateDisplay();
             
-            // Auto calculate if it seems like a full expression (contains operations but doesn't end in one)
             const endsWithOperator = /[÷×−+^%(√]$/.test(pastedText);
             const hasOperator = /[÷×−+^%√]/.test(pastedText);
             
             if (hasOperator && !endsWithOperator) {
-                // Short delay to let user see pasted expression before it calculates
                 setTimeout(() => handleCalculate(), 200);
             }
         }
@@ -1006,19 +1063,16 @@
 
     // Keyboard Support
     document.addEventListener('keydown', (e) => {
-        // Allow normal typing inside settings text inputs! (e.g. typing hex codes)
         if (e.target.tagName === 'INPUT') return;
 
-        // Prevent zooming with Ctrl/Cmd + +/-, or other unwanted default browser shortcuts
         if (e.ctrlKey || e.metaKey) {
             if (['+', '-', '=', '0', '_'].includes(e.key)) {
                 e.preventDefault();
             }
         }
 
-        // Prevent default behavior for specific keys to avoid scrolling/find
         if (['Enter', 'Backspace', 'Escape', ' '].includes(e.key)) {
-            if (e.key === ' ') e.preventDefault(); // Prevent space from triggering focused buttons
+            if (e.key === ' ') e.preventDefault();
         }
 
         const keyMap = {
@@ -1037,7 +1091,6 @@
             '^': '^'
         };
 
-        // Catch the key and strictly stop the browser from using it for zooming/finding/scrolling
         if (keyMap[e.key]) {
             e.preventDefault(); 
             handleInput(keyMap[e.key]);
@@ -1069,6 +1122,7 @@
     // Initialize App
     loadState();
     updateDisplay();
+    updateFullscreenIcon();
 </script>
 </body>
 </html>
