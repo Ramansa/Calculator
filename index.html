@@ -4,11 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Free Online Calculator | Scientific & Basic</title>
-    <meta name="description" content="A free, fast, and responsive online calculator. Features basic math, scientific functions, history, and full keyboard support.">
-    <meta name="keywords" content="calculator, online calculator, scientific calculator, free math calculator, web app">
+    <meta name="description" content="A free, fast, and responsive online calculator. Features basic math, scientific functions, history, copy result, and full keyboard support.">
+    <meta name="keywords" content="calculator, online calculator, scientific calculator, free math calculator, copy calculation, web app">
     <meta name="robots" content="index, follow">
     <meta property="og:title" content="Online Calculator">
-    <meta property="og:description" content="A fast, responsive online calculator featuring scientific functions and history.">
+    <meta property="og:description" content="A fast, responsive online calculator featuring scientific functions, history, and quick copy actions.">
     <meta property="og:type" content="website">
     
     <style>
@@ -98,11 +98,12 @@
             justify-content: flex-end;
             padding: 1rem 1.5rem;
             min-height: 20vh;
+            position: relative;
         }
 
         @media (min-width: 640px) {
             .display-area {
-                min-height: 28vh;
+                min-height: 26vh;
                 padding: 1.5rem;
             }
         }
@@ -110,18 +111,32 @@
         .history-display {
             display: flex;
             flex-direction: column;
-            justify-content: flex-end;
-            color: #6b7280;
+            justify-content: flex-start;
+            color: #9ca3af;
             text-align: right;
             font-size: 0.95rem;
-            height: 2.5rem;
-            margin-bottom: 0.25rem;
-            overflow-y: hidden;
-            overflow-x: auto;
-            white-space: nowrap;
+            max-height: 4.5rem;
+            margin-bottom: 0.35rem;
+            overflow-y: auto;
+            overflow-x: hidden;
             letter-spacing: 0.05em;
             font-weight: 300;
-            gap: 0.25rem;
+            gap: 0.35rem;
+            scroll-behavior: smooth;
+        }
+
+        .history-item {
+            cursor: pointer;
+            transition: color 0.15s, opacity 0.15s;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            padding: 0.1rem 0.25rem;
+            border-radius: 0.25rem;
+        }
+        .history-item:hover {
+            color: var(--accent-color);
+            background-color: rgba(255, 255, 255, 0.05);
         }
 
         .main-display-wrapper {
@@ -130,6 +145,14 @@
             align-items: flex-end;
             width: 100%;
             position: relative;
+        }
+
+        .main-display-row {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            width: 100%;
+            gap: 0.5rem;
         }
 
         .main-display {
@@ -142,6 +165,7 @@
             outline: none;
             transition: font-size 0.2s ease;
             line-height: 1.1;
+            cursor: text;
         }
         
         .text-6xl { font-size: 3.25rem; }
@@ -152,6 +176,29 @@
             .text-6xl { font-size: 3.75rem; }
             .text-4xl { font-size: 2.5rem; }
             .text-3xl { font-size: 1.875rem; }
+        }
+
+        .quick-copy-btn {
+            background: transparent;
+            border: none;
+            color: #6b7280;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.35rem;
+            border-radius: 0.5rem;
+            transition: color 0.2s, background-color 0.2s, transform 0.15s;
+            flex-shrink: 0;
+            opacity: 0.7;
+        }
+        .quick-copy-btn:hover {
+            color: var(--accent-color);
+            background-color: rgba(255, 255, 255, 0.08);
+            opacity: 1;
+        }
+        .quick-copy-btn:active {
+            transform: scale(0.9);
         }
 
         .live-result-display {
@@ -176,26 +223,46 @@
 
         /* --- Panel & Keypad --- */
         .mode-toggle-bar {
-            padding: 0.25rem 1rem;
+            padding: 0.35rem 0.85rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 0.875rem;
+            gap: 0.35rem;
+            font-size: 0.85rem;
             font-weight: 500;
             color: #9ca3af;
             flex-shrink: 0;
         }
 
+        .bar-group {
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
         .pill-btn {
-            padding: 0.25rem 0.75rem;
+            padding: 0.3rem 0.65rem;
             border-radius: 9999px;
             border: none;
             display: flex;
             align-items: center;
-            gap: 0.25rem;
+            gap: 0.3rem;
             cursor: pointer;
             font-family: inherit;
-            font-size: inherit;
+            font-size: 0.8rem;
+            transition: background-color 0.2s, color 0.2s, transform 0.1s;
+        }
+        .pill-btn:active {
+            transform: scale(0.96);
+        }
+
+        .copy-pill-btn {
+            background-color: rgba(255, 255, 255, 0.06);
+            color: #d1d5db;
+        }
+        .copy-pill-btn:hover {
+            color: var(--accent-color);
+            background-color: rgba(255, 255, 255, 0.14);
         }
 
         /* Scientific Drawer Accordion Wrapper */
@@ -328,7 +395,7 @@
 
         /* --- Icons --- */
         .icon { width: 1.35rem; height: 1.35rem; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-        .icon-sm { width: 1rem; height: 1rem; transition: transform 0.3s ease; }
+        .icon-sm { width: 0.95rem; height: 0.95rem; transition: transform 0.3s ease; }
         .icon-lg { width: 1.75rem; height: 1.75rem; }
 
         /* --- Top Action Header (Settings & Fullscreen) --- */
@@ -365,6 +432,43 @@
         }
         .header-icon-btn:active {
             transform: scale(0.92);
+        }
+
+        /* --- Toast Notification --- */
+        .toast-notification {
+            position: fixed;
+            top: max(1.25rem, env(safe-area-inset-top, 1.25rem));
+            left: 50%;
+            transform: translateX(-50%) translateY(-25px);
+            background-color: var(--calc-color);
+            color: var(--text-color);
+            border: 1px solid var(--accent-color);
+            padding: 0.6rem 1.15rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 15px rgba(168, 199, 250, 0.2);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1), transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: 60;
+            max-width: 90vw;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            overflow: hidden;
+        }
+        .toast-notification.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+        .toast-icon {
+            width: 1.1rem;
+            height: 1.1rem;
+            color: var(--accent-color);
+            flex-shrink: 0;
         }
 
         .sr-only {
@@ -500,7 +604,6 @@
     <header class="top-actions">
         <!-- Fullscreen Button -->
         <button id="fullscreen-btn" class="header-icon-btn" aria-label="Toggle Fullscreen" title="Toggle Fullscreen">
-            <!-- Default: Enter Fullscreen Icon -->
             <svg id="fullscreen-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon">
                 <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
             </svg>
@@ -514,6 +617,14 @@
             </svg>
         </button>
     </header>
+
+    <!-- Toast Notification for Copy Feedback -->
+    <div id="copy-toast" class="toast-notification" role="status" aria-live="polite">
+        <svg class="toast-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+        <span id="toast-message">Copied to clipboard</span>
+    </div>
 
     <!-- Settings Modal -->
     <div id="settings-modal" class="modal-overlay">
@@ -595,15 +706,25 @@
             <!-- Display Area -->
             <div class="display-area">
                 <!-- History / Previous expressions -->
-                <div id="history-display" class="history-display no-scrollbar">
-                    <!-- History appears here -->
+                <div id="history-display" class="history-display no-scrollbar" title="Click any calculation to copy it">
+                    <!-- History rows appear here -->
                 </div>
                 
                 <!-- Current Input / Result -->
                 <div class="main-display-wrapper">
-                    <div id="main-display" class="main-display text-6xl no-scrollbar" dir="ltr">
-                        0
+                    <div class="main-display-row">
+                        <div id="main-display" class="main-display text-6xl no-scrollbar" dir="ltr" title="Current calculation / result">
+                            0
+                        </div>
+                        <!-- Quick Display Copy Button -->
+                        <button id="quick-copy-display-btn" class="quick-copy-btn" title="Copy result to clipboard" aria-label="Copy result">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon-sm" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/>
+                                <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
+                            </svg>
+                        </button>
                     </div>
+
                     <!-- Live Result Display -->
                     <div id="live-result-display" class="live-result-display">
                     </div>
@@ -613,13 +734,41 @@
             <!-- Divider -->
             <div class="divider"></div>
 
-            <!-- Scientific Mode Toggle -->
+            <!-- Scientific & Copy Action Bar -->
             <div class="mode-toggle-bar">
-                <button id="deg-rad-btn" class="pill-btn theme-btn">RAD</button>
-                <button id="sci-toggle" class="pill-btn theme-btn" aria-expanded="false" aria-controls="scientific-drawer-container">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon icon-sm" id="sci-icon"><path d="m18 15-6-6-6 6"></path></svg>
-                    <span id="sci-text">Scientific</span>
-                </button>
+                <div class="bar-group">
+                    <button id="deg-rad-btn" class="pill-btn theme-btn">RAD</button>
+                </div>
+
+                <!-- Copy Feature Buttons -->
+                <div class="bar-group">
+                    <!-- Copy Result Button -->
+                    <button id="copy-result-btn" class="pill-btn copy-pill-btn" title="Copy only the current result (Ctrl+C)" aria-label="Copy result">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon-sm" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/>
+                            <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
+                        </svg>
+                        <span>Result</span>
+                    </button>
+
+                    <!-- Copy All Calculations with Answer Button -->
+                    <button id="copy-all-btn" class="pill-btn copy-pill-btn" title="Copy all calculations with answer (Ctrl+Shift+C)" aria-label="Copy all calculations with answer">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon-sm" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+                            <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+                            <line x1="9" y1="11" x2="15" y2="11"></line>
+                            <line x1="9" y1="15" x2="15" y2="15"></line>
+                        </svg>
+                        <span>All</span>
+                    </button>
+                </div>
+
+                <div class="bar-group">
+                    <button id="sci-toggle" class="pill-btn theme-btn" aria-expanded="false" aria-controls="scientific-drawer-container">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon icon-sm" id="sci-icon"><path d="m18 15-6-6-6 6"></path></svg>
+                        <span id="sci-text">Scientific</span>
+                    </button>
+                </div>
             </div>
 
             <!-- Scientific Panel (Collapsible Accordion Wrapper) -->
@@ -693,6 +842,7 @@
     let btnColor = '#3c4043';
     let accentColor = '#a8c7fa';
     let textColor = '#ffffff';
+    let toastTimeout = null;
     const STORAGE_KEY = 'online_calc_state_v2';
 
     // DOM Elements
@@ -704,6 +854,13 @@
     const sciIcon = document.getElementById('sci-icon');
     const degRadBtn = document.getElementById('deg-rad-btn');
     const btnClear = document.getElementById('btn-clear');
+
+    // Copy Elements
+    const copyResultBtn = document.getElementById('copy-result-btn');
+    const copyAllBtn = document.getElementById('copy-all-btn');
+    const quickCopyDisplayBtn = document.getElementById('quick-copy-display-btn');
+    const copyToast = document.getElementById('copy-toast');
+    const toastMessage = document.getElementById('toast-message');
 
     // Fullscreen Elements
     const fullscreenBtn = document.getElementById('fullscreen-btn');
@@ -724,6 +881,47 @@
     const accentColorText = document.getElementById('accent-color-text');
     const textColorPicker = document.getElementById('text-color-picker');
     const textColorText = document.getElementById('text-color-text');
+
+    // --- Toast UI Helper ---
+    function showToast(message) {
+        toastMessage.textContent = message;
+        copyToast.classList.add('show');
+        clearTimeout(toastTimeout);
+        toastTimeout = setTimeout(() => {
+            copyToast.classList.remove('show');
+        }, 2200);
+    }
+
+    // --- Iframe-Safe Clipboard Copy Helper ---
+    function copyTextToClipboard(text) {
+        if (!text && text !== '0') return false;
+        let successful = false;
+
+        // Try execCommand copy (standard for iFrames without clipboard permissions)
+        try {
+            const tempTextArea = document.createElement('textarea');
+            tempTextArea.value = text;
+            tempTextArea.style.position = 'fixed';
+            tempTextArea.style.top = '-9999px';
+            tempTextArea.style.left = '-9999px';
+            tempTextArea.setAttribute('readonly', '');
+            document.body.appendChild(tempTextArea);
+            tempTextArea.select();
+            tempTextArea.setSelectionRange(0, 99999);
+            successful = document.execCommand('copy');
+            document.body.removeChild(tempTextArea);
+        } catch (err) {
+            console.warn('execCommand copy fallback failed:', err);
+        }
+
+        // Secondary try with navigator.clipboard if available
+        if (!successful && navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(text).catch(() => {});
+            successful = true;
+        }
+
+        return successful || true;
+    }
 
     // Fullscreen Helper Logic
     function isCurrentlyFullscreen() {
@@ -913,14 +1111,17 @@
             }
         }
         
-        historyDisplay.innerHTML = historyList.map(item => `<div>${item}</div>`).join('');
+        // Render history with clickable items for quick individual copying
+        historyDisplay.innerHTML = historyList.map((item, index) => 
+            `<div class="history-item" data-idx="${index}" title="Click to copy: ${item}">${item}</div>`
+        ).join('');
         historyDisplay.scrollTop = historyDisplay.scrollHeight;
         mainDisplay.scrollLeft = mainDisplay.scrollWidth;
         
         if (mainDisplay.textContent.length > 10) {
             mainDisplay.classList.remove('text-6xl');
             mainDisplay.classList.add('text-4xl');
-            if(mainDisplay.textContent.length > 15) {
+            if (mainDisplay.textContent.length > 15) {
                 mainDisplay.classList.remove('text-4xl');
                 mainDisplay.classList.add('text-3xl');
             }
@@ -951,7 +1152,7 @@
         const result = evaluateExpression(currentInput);
         if (result !== 'Error') {
             historyList.push(currentInput + ' = ' + result);
-            if (historyList.length > 2) {
+            if (historyList.length > 50) {
                 historyList.shift();
             }
         }
@@ -993,7 +1194,82 @@
         updateDisplay();
     }
 
-    // --- Event Listeners ---
+    // --- Copy Handlers ---
+
+    // 1. Copy Result Only
+    function getCurrentResultValue() {
+        if (isCalculated && currentInput && currentInput !== 'Error') {
+            return currentInput;
+        }
+        if (currentInput) {
+            const evalRes = evaluateExpression(currentInput);
+            if (evalRes && evalRes !== 'Error') {
+                return evalRes.toString();
+            }
+            return currentInput;
+        }
+        if (historyList.length > 0) {
+            const last = historyList[historyList.length - 1];
+            const parts = last.split('=');
+            if (parts.length > 1) return parts[1].trim();
+        }
+        return '0';
+    }
+
+    function handleCopyResult() {
+        const result = getCurrentResultValue();
+        copyTextToClipboard(result);
+        showToast(`Result copied: ${result}`);
+    }
+
+    // 2. Copy All Calculations with Answer
+    function getAllCalculationsWithAnswer() {
+        const records = [...historyList];
+        
+        // If there's an ongoing calculation in progress not yet in history
+        if (currentInput && !isCalculated) {
+            const res = evaluateExpression(currentInput);
+            if (res && res !== 'Error') {
+                records.push(`${currentInput} = ${res}`);
+            } else {
+                records.push(currentInput);
+            }
+        }
+
+        if (records.length === 0) {
+            return currentInput ? `${currentInput} = ${getCurrentResultValue()}` : '0 = 0';
+        }
+
+        return records.join('\n');
+    }
+
+    function handleCopyAll() {
+        const fullContent = getAllCalculationsWithAnswer();
+        const totalLines = fullContent.split('\n').length;
+        copyTextToClipboard(fullContent);
+        if (totalLines > 1) {
+            showToast(`Copied all ${totalLines} calculations with answers!`);
+        } else {
+            showToast(`Copied: ${fullContent}`);
+        }
+    }
+
+    // Copy event bindings
+    copyResultBtn.addEventListener('click', handleCopyResult);
+    quickCopyDisplayBtn.addEventListener('click', handleCopyResult);
+    copyAllBtn.addEventListener('click', handleCopyAll);
+
+    // Clicking individual history line copies that specific calculation
+    historyDisplay.addEventListener('click', (e) => {
+        const item = e.target.closest('.history-item');
+        if (item) {
+            const text = item.textContent;
+            copyTextToClipboard(text);
+            showToast(`Copied: ${text}`);
+        }
+    });
+
+    // --- Event Listeners for Keypad & Controls ---
     document.querySelectorAll('.input-btn, .sci-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
             const val = e.currentTarget.getAttribute('data-val');
@@ -1090,7 +1366,7 @@
         if (e.target.tagName === 'INPUT') return;
         
         const clipboardData = e.clipboardData || window.clipboardData;
-        let pastedText = clipboardData.getData('text');
+        let pastedText = clipboardData ? clipboardData.getData('text') : '';
         
         if (!pastedText) return;
         
@@ -1123,6 +1399,17 @@
     // Keyboard Support
     document.addEventListener('keydown', (e) => {
         if (e.target.tagName === 'INPUT') return;
+
+        // Copy Shortcuts: Ctrl+Shift+C (Copy All), Ctrl+C (Copy Result)
+        if ((e.ctrlKey || e.metaKey) && (e.key.toLowerCase() === 'c')) {
+            e.preventDefault();
+            if (e.shiftKey) {
+                handleCopyAll();
+            } else {
+                handleCopyResult();
+            }
+            return;
+        }
 
         if (e.ctrlKey || e.metaKey) {
             if (['+', '-', '=', '0', '_'].includes(e.key)) {
